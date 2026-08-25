@@ -163,6 +163,8 @@ gglobalclocks:::date_time_tz_to_tzs(
   right_join(a_day, by = "hour") |> 
   arrange(-hour)
   
+
+
 }
 ```
 
@@ -175,7 +177,7 @@ compute_panel_around <- function(data, scales, around_start = 0, radius = 1, x0 
   
   data |> 
     mutate(row_id = row_number()) |> 
-    mutate(around = 2 * pi * row_id/n() + around_start * 2*pi / 360,
+    mutate(around = - 2 * pi * row_id/n() - around_start * 2*pi / 360,
            x = radius*cos(around) + x0, 
            y = radius*sin(around) + y0,
            angle = 360*around/(2*pi),
@@ -210,8 +212,8 @@ compute_panel_locales_around <- function(data, scales, around_start = 0, radius 
            str_extract("\\d+") |> 
            as.numeric())  |>
   right_join(a_day, by = "hour") |> 
-  arrange(-hour) |> 
-  compute_panel_around() |>
+  arrange(hour) |> 
+  compute_panel_around(scales = scales, around_start = around_start, radius = radius, x0 = x0, y0 = y0) |>
   filter_out(is.na(locations)) |> 
   mutate(PANEL = 1) # not the best, Gina, not the best...
 
@@ -239,11 +241,11 @@ tribble(~tz,
 #> # A tibble: 5 × 14
 #>   locations  local_date_time_utc local_time_hm local_wday_date  hour hour_pretty
 #>   <fct>      <dttm>              <chr>         <chr>           <dbl> <chr>      
-#> 1 Africa/Ka… 2026-08-24 18:00:00 18:00         Mon, Aug 24        18 6 PM       
-#> 2 Amsterdam… 2026-08-24 17:00:00 17:00         Mon, Aug 24        17 5 PM       
-#> 3 Santiago   2026-08-24 11:00:00 11:00         Mon, Aug 24        11 11 AM      
-#> 4 US/Mounta… 2026-08-24 09:00:00 09:00         Mon, Aug 24         9 9 AM       
-#> 5 Melbourne  2026-08-25 01:00:00 01:00         Tue, Aug 25         1 1 AM       
+#> 1 Melbourne  2026-08-26 01:00:00 01:00         Wed, Aug 26         1 1 AM       
+#> 2 US/Mounta… 2026-08-25 09:00:00 09:00         Tue, Aug 25         9 9 AM       
+#> 3 Santiago   2026-08-25 11:00:00 11:00         Tue, Aug 25        11 11 AM      
+#> 4 Amsterdam… 2026-08-25 17:00:00 17:00         Tue, Aug 25        17 5 PM       
+#> 5 Africa/Ka… 2026-08-25 18:00:00 18:00         Tue, Aug 25        18 6 PM       
 #> # ℹ 8 more variables: row_id <int>, around <dbl>, x <dbl>, y <dbl>,
 #> #   angle <dbl>, x0 <dbl>, y0 <dbl>, PANEL <dbl>
 
@@ -277,7 +279,7 @@ tribble(~tz,
 ![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
-geom_text_places <- make_constructor(GeomText, stat = StatLocalesAround, radius = .9, hjust = 1)
+geom_text_places <- make_constructor(GeomText, stat = StatLocalesAround, radius = .95, hjust = 1)
 stamp_text_hours <- make_constructor(GeomText, stat = StatAround, radius = 1.025, hjust = 0, inherit.aes = FALSE, data = a_day, mapping = aes(label = hour_pretty))
 stamp_segment_pie_cuts <- make_constructor(GeomSegment, stat = StatAround, around_start = pi/24 + 1, linetype = "dotted", inherit.aes = FALSE, data = a_day, mapping = aes(label = hour_pretty))
 
@@ -327,20 +329,29 @@ chart_tz_wheel <- function(
 }
 
 
-lag_around <- function(x, n){
-  
-  c(x[(n+1):length(x)], x[1:n])
-  
-}
+# lag_around <- function(x, n){
+#   
+#   c(x[(n+1):length(x)], x[1:n])
+#   
+# }
 ```
 
 ## Done! (?)
 
 ``` r
 tribble(~timezone,
-        Sys.timezone(),
+        "America/Denver",
+        "America/Chicago",
+        "America/San_Francisco",
+        "America/New_York",
         "Australia/Melbourne", 
-        "Europe/Amsterdam") |>
+        "Europe/Amsterdam",
+        "Europe/Berlin",
+        "Europe/London",
+        "America/Buenos_Aires",
+        "America/Santiago",
+        "Africa/Kampala",
+        "Pacific/Auckland") |>
   ggplot() + 
     aes(tz = timezone) + 
     chart_tz_wheel() + 
@@ -348,6 +359,21 @@ tribble(~timezone,
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+``` r
+
+OlsonNames() |> sample(20)
+#>  [1] "Etc/GMT+5"                      "Africa/Ouagadougou"            
+#>  [3] "America/Argentina/Cordoba"      "Asia/Ashgabat"                 
+#>  [5] "Asia/Karachi"                   "Etc/GMT-9"                     
+#>  [7] "America/Scoresbysund"           "Asia/Bangkok"                  
+#>  [9] "Europe/Helsinki"                "America/Argentina/Salta"       
+#> [11] "America/Santiago"               "Pacific/Pago_Pago"             
+#> [13] "Etc/GMT+8"                      "Asia/Dubai"                    
+#> [15] "America/North_Dakota/New_Salem" "Kwajalein"                     
+#> [17] "Atlantic/Reykjavik"             "Asia/Pontianak"                
+#> [19] "America/Manaus"                 "America/Cordoba"
+```
 
 # Anatomy of wrapper functions for pies?
 

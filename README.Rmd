@@ -99,6 +99,8 @@ gglobalclocks:::date_time_tz_to_tzs(
   right_join(a_day, by = "hour") |> 
   arrange(-hour)
   
+
+
 }
 ```
 
@@ -109,7 +111,7 @@ compute_panel_around <- function(data, scales, around_start = 0, radius = 1, x0 
   
   data |> 
     mutate(row_id = row_number()) |> 
-    mutate(around = 2 * pi * row_id/n() + around_start * 2*pi / 360,
+    mutate(around = - 2 * pi * row_id/n() - around_start * 2*pi / 360,
            x = radius*cos(around) + x0, 
            y = radius*sin(around) + y0,
            angle = 360*around/(2*pi),
@@ -144,8 +146,8 @@ compute_panel_locales_around <- function(data, scales, around_start = 0, radius 
            str_extract("\\d+") |> 
            as.numeric())  |>
   right_join(a_day, by = "hour") |> 
-  arrange(-hour) |> 
-  compute_panel_around() |>
+  arrange(hour) |> 
+  compute_panel_around(scales = scales, around_start = around_start, radius = radius, x0 = x0, y0 = y0) |>
   filter_out(is.na(locations)) |> 
   mutate(PANEL = 1) # not the best, Gina, not the best...
 
@@ -199,7 +201,7 @@ tribble(~tz,
 ```
 
 ```{r}
-geom_text_places <- make_constructor(GeomText, stat = StatLocalesAround, radius = .9, hjust = 1)
+geom_text_places <- make_constructor(GeomText, stat = StatLocalesAround, radius = .95, hjust = 1)
 stamp_text_hours <- make_constructor(GeomText, stat = StatAround, radius = 1.025, hjust = 0, inherit.aes = FALSE, data = a_day, mapping = aes(label = hour_pretty))
 stamp_segment_pie_cuts <- make_constructor(GeomSegment, stat = StatAround, around_start = pi/24 + 1, linetype = "dotted", inherit.aes = FALSE, data = a_day, mapping = aes(label = hour_pretty))
 
@@ -249,11 +251,11 @@ chart_tz_wheel <- function(
 }
 
 
-lag_around <- function(x, n){
-  
-  c(x[(n+1):length(x)], x[1:n])
-  
-}
+# lag_around <- function(x, n){
+#   
+#   c(x[(n+1):length(x)], x[1:n])
+#   
+# }
 
 
 
@@ -264,13 +266,24 @@ lag_around <- function(x, n){
 
 ```{r, eval = T}
 tribble(~timezone,
-        Sys.timezone(),
+        "America/Denver",
+        "America/Chicago",
+        "America/San_Francisco",
+        "America/New_York",
         "Australia/Melbourne", 
-        "Europe/Amsterdam") |>
+        "Europe/Amsterdam",
+        "Europe/Berlin",
+        "Europe/London",
+        "America/Buenos_Aires",
+        "America/Santiago",
+        "Africa/Kampala",
+        "Pacific/Auckland") |>
   ggplot() + 
     aes(tz = timezone) + 
     chart_tz_wheel() + 
     labs(title = "Virtual meetup coordinators' wheel, Summer 2026")
+
+OlsonNames() |> sample(20)
 ```
 
 
