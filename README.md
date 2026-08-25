@@ -7,25 +7,28 @@
 
 <!-- badges: end -->
 
+> Schreiben ist wichtig.
+
 When should you schedule a virtual meeting with a Melbourne based
-presenter 🦘, while you are hosting from Denver ⛰️, and when it is
-daylight savings in most of the northern hemisphere? This type of
-question motivates the ggtz.wheel project. Where’s it light out?! 💡
+presenter 🦘, if you are hosting from Denver ⛰️, and when it is daylight
+savings in most of the northern hemisphere and you want folks from
+around the world to be able to join? This type of question motivates the
+ggtz.wheel project.
 
-But I want to do even more with the {ggtz.wheel} repo – and experiment
-with the narrative-preserving package development framework
-‘readme-to-package’ - and asking the question: ’Can we make package
-development even more interactive, more high leverage, and fun? Let’s
-see if it can!
+The readme for {ggtz.wheel} is especially experimental. In this README,
+I want to push the boundaries of the narrative-preserving package
+development framework ‘readme-to-package’ - and ask the question: ’Can
+we make package development even more interactive, more chatty, more
+fun, and much more verbose? Let’s see if it can! Schreiben ist wichtig.
 
-Specifically, like litr and fusen frameworks, the readme-to-package
-framework (now supported by knitrExtra) allows prose and *package* code
-to be intermingled. There may be reasons to move away from these
-frameworks down the road (given the almost universally accepted that the
-source lives - in the .R folder). But when an idea is relatively fresh,
-it is probably deserving of some intense prose-supported thought - some
-good old fashioned natural language - an amazing and powerful technology
-… 🫠
+The ‘readme-to-package’ workflow (now supported by knitrExtra) allows
+prose and *package* code to be intermingled (see also the literate
+packaging tools like litr and fusen frameworks). There may be reasons to
+move away from these frameworks down the road (given the almost
+universally accepted that the source lives - in the .R folder). But when
+an idea is relatively fresh, it is probably deserving of some intense
+prose-supported thought - some good old fashioned natural language - an
+amazing and powerful technology … 🫠
 
 So the intent is that the prose here will go well beyond explanation
 about what the package delivers – the kind of prose that I’m comfortable
@@ -97,108 +100,16 @@ applying the recommendations in ’’ to just one other simple case:
 `piechart()` from the chapter programming with ggplot2. And then we can
 have a look at the messier feeling case, a gg_tz_wheel case.
 
-# Anatomy of wrapper functions…
-
-So what’s a
-
-The ggplot2 book models the following…
-<https://ggplot2-book.org/programming.html#sec-functions>
-
-``` r
-piechart <- function(data, var) {
-  ggplot(data, aes(factor(1), fill = {{ var }})) +
-    geom_bar(width = 1) + 
-    coord_polar(theta = "y") + 
-    xlab(NULL) + 
-    ylab(NULL)
-}
-```
-
-But following ‘plot helper functions’, we wouldn’t do this. Instead,
-we’d expose our decision as arguments. I take a few more liberties too
-which feel in the spirit of the plot helper functions - just maybe
-pushing that logic a little further:
-
-1.  adding `.labs` and `.mapping` argument following the inclusion of
-    arguments for other plot elements
-2.  change `.geom` argument name to `.layers`, anticipating that all
-    layers would go here - both geoms and stats
-3.  break up `.scales_coord` to separate elements `.scales` and
-    `.coord`. `list()` is used anticipating that multiple scales could
-    be included here.
-
-``` r
-library(ggplot2)
-
-
-# or (liking this a little more)
-ggpie <- function(data, 
-                  mapping = NULL, 
-                  .data_wrangling = identity,
-                  .mapping = aes(x = factor(1)),
-                  .layers = list(geom_bar(width = 1, position = "fill")), 
-                  .coord = coord_polar(theta = "y"), 
-                  .scales = list(NULL),
-                  .labs = labs(x = NULL, y = NULL),
-                  .other = NULL) {
-  
-  data |> 
-    .data_wrangling() |> # pre-plot data transformation
-    ggplot(mapping = mapping) +
-    list(.mapping, .layers, .coord, .labs, .other) # bundled specification
-  
-  }
-```
-
-In parallel you might create plot-w
-
-``` r
-chart_pie <- function(.mapping = aes(x = factor(1)),
-                  .layers = geom_bar(width = 1, position = "fill"), 
-                  .coord = coord_polar(theta = "y"), 
-                  .labs = labs(x = NULL, y = NULL),
-                  .other = NULL){
-  
-     list(.mapping, .layers, .coord, .labs, .other)
-  
-}
-
-ggpie(diamonds, aes(fill = cut))
-```
-
-![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
-
-``` r
-
-ggplot(diamonds, aes(fill = cut)) + 
-  chart_pie()
-```
-
-![](README_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
-
-``` r
-ggpie <- function(data, 
-                  fill_var, 
-                  .mapping = aes(x = factor(1), fill = {{fill_var}}),
-                  .layers = list(geom_bar(width = 1, position = "fill")), 
-                  .scales = list(NULL),
-                  .coord = coord_polar(theta = "y"), 
-                  .labs = labs(x = NULL, y = NULL),
-                  .other = NULL) {
-  
-  ggplot(data) +
-    list(.mapping, .layers, .coord, .scales, .labs, .other)
-  
-  }
-```
+# ggtz.wheel internals sketch
 
 ``` r
 library(tidyverse)
 #> ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
 #> ✔ dplyr     1.2.0     ✔ readr     2.1.6
 #> ✔ forcats   1.0.1     ✔ stringr   1.6.0
-#> ✔ lubridate 1.9.4     ✔ tibble    3.3.0
-#> ✔ purrr     1.2.0     ✔ tidyr     1.3.1
+#> ✔ ggplot2   4.0.1     ✔ tibble    3.3.0
+#> ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+#> ✔ purrr     1.2.0     
 #> ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
 #> ✖ dplyr::filter() masks stats::filter()
 #> ✖ dplyr::lag()    masks stats::lag()
@@ -264,7 +175,7 @@ compute_panel_around <- function(data, scales, around_start = 0, radius = 1, x0 
   
   data |> 
     mutate(row_id = row_number()) |> 
-    mutate(around = around_start* 2*pi/360 + 2 * pi * row_id/n(),
+    mutate(around = 2 * pi * row_id/n() + around_start * 2*pi / 360,
            x = radius*cos(around) + x0, 
            y = radius*sin(around) + y0,
            angle = 360*around/(2*pi),
@@ -281,13 +192,14 @@ StatAround <- ggproto("StatAround", Stat,
                                         yend = after_stat(y0)))
 
 
-compute_panel_locales_around <- function(data, scales, around_start = 0, radius = 1, x0 = 0, y0 = 0, from_date_time = Sys.Date() |> paste("09:00:00"), from_tz = Sys.timezone()){
-  
-   a_day <- tibble(hour = 1:24, 
+a_day <- tibble(hour = 1:24, 
        hour_pretty = rep(1:12, 2) |> 
          paste(c(rep("AM", 11), "noon",
                c(rep("PM", 11), "midnight"))) |>
          str_remove("12 "))
+
+compute_panel_locales_around <- function(data, scales, around_start = 0, radius = 1, x0 = 0, y0 = 0, 
+                                         from_date_time = Sys.Date() |> paste("09:00:00"), from_tz = Sys.timezone()){
   
   gglobalclocks:::date_time_tz_to_tzs(
     from_date_time = from_date_time, 
@@ -301,7 +213,7 @@ compute_panel_locales_around <- function(data, scales, around_start = 0, radius 
   arrange(-hour) |> 
   compute_panel_around() |>
   filter_out(is.na(locations)) |> 
-  mutate(PANEL = 1)
+  mutate(PANEL = 1) # not the best, Gina, not the best...
 
 }
 
@@ -313,28 +225,6 @@ StatLocalesAround <- ggproto("StatLocalesAround", Stat,
                                         yend = after_stat(y0)))
 
 
-tz_wrangle() |> 
-  ggplot() +
-  aes(label = locations) +
-  coord_equal(ylim = c(-1.2,1.2), xlim = c(-1.2,1.2)) +
-  geom_text(stat = StatAround, radius = .975) + 
-  geom_text(stat = StatAround, 
-            radius = 1.025, around_start = 90,
-            aes(label = hour_pretty),
-            hjust = 0) + 
-  geom_segment(stat = StatAround, 
-               around_start = pi/24 + 1, 
-               linetype = "dashed") +
-  geom_polygon(stat = StatAround, color = "darkgray", fill = NA,
-               data = data.frame(x = 1:80), inherit.aes = F) + 
-  labs(title = "Virtual meetup coordinators' wheel, Summer 2026",
-       subtitle = "From the ggplot2 extenders ❤️") + 
-  theme_void(base_size = 9, ink = "darkgray")
-```
-
-![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
-
-``` r
 
 tribble(~tz,
         "Europe/Amsterdam", 
@@ -367,16 +257,16 @@ tribble(~tz,
         "Asia/Seoul", 
         "Africa/Kampala") |> 
   ggplot() + 
-    coord_equal(ylim = c(-1.2,1.2), xlim = c(-1.2,1.2)) +
   aes(tz = tz) +
-  geom_text(stat = StatLocalesAround, radius = .975) + 
-  geom_text(stat = StatAround, data = a_day,
+  coord_equal(ylim = c(-1.2,1.2), xlim = c(-1.2,1.2)) +
+  geom_text(stat = StatLocalesAround, radius = .93) + 
+  geom_text(stat = StatAround, data = a_day, inherit.aes = FALSE,
             radius = 1.025, around_start = 90,
-            aes(label = hour_pretty, tz = NULL),
+            aes(label = hour_pretty),
             hjust = 0) + 
-  geom_segment(stat = StatAround, data = a_day, aes(tz = NULL),
+  geom_segment(stat = StatAround, data = a_day, inherit.aes = FALSE,
                around_start = pi/24 + 1, 
-               linetype = "dashed") +
+               linetype = "dotted") +
   geom_polygon(stat = StatAround, color = "darkgray", fill = NA,
                data = data.frame(x = 1:80), inherit.aes = F) + 
   labs(title = "Virtual meetup coordinators' wheel, Summer 2026",
@@ -384,12 +274,12 @@ tribble(~tz,
   theme_void(base_size = 9, ink = "darkgray")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
-geom_text_inner <- make_constructor(GeomText, stat = StatAround, radius = .975)
-geom_text_outer <- make_constructor(GeomText, stat = StatAround, radius = 1.025, hjust = 0)
-stamp_segment_pie_cuts <- make_constructor(GeomSegment, stat = StatAround, around_start = pi/24 + 1, linetype = "dotted", inherit.aes = FALSE)
+geom_text_places <- make_constructor(GeomText, stat = StatLocalesAround, radius = .9, hjust = 1)
+stamp_text_hours <- make_constructor(GeomText, stat = StatAround, radius = 1.025, hjust = 0, inherit.aes = FALSE, data = a_day, mapping = aes(label = hour_pretty))
+stamp_segment_pie_cuts <- make_constructor(GeomSegment, stat = StatAround, around_start = pi/24 + 1, linetype = "dotted", inherit.aes = FALSE, data = a_day, mapping = aes(label = hour_pretty))
 
 GeomPolygonHollow <- ggproto("GeomPolygonHollow", GeomPolygon,
                              default_aes = GeomPolygon$default_aes |> 
@@ -399,7 +289,7 @@ stamp_polygon_circle <- make_constructor(GeomPolygonHollow, stat = StatAround, d
 
 theme_timezone_wheel <- function(...){
   
-  theme_void(base_size = 9, ink = "darkgray", ...)
+  theme_void(base_size = 9, ink = "grey20", ...)
   
 }
 
@@ -410,118 +300,152 @@ coord_equal_padded <- function(...){coord_equal(ylim = c(-1.2,1.2),
 
 ``` r
 chart_tz_wheel <- function(
-  .mapping.geom.text.outer = aes(),
-  .mapping.geom.text.inner = aes(),
+  mapping = aes(),
   .coord = coord_equal_padded(),
+  .geom.text.places = geom_text_places(), 
   .stamp.segment.pie.cuts = stamp_segment_pie_cuts(),
   .stamp.polygon.circle = stamp_polygon_circle(),
-  .geom.text.inner = geom_text_inner(mapping = .mapping.geom.text.inner), 
-  .geom.text.outer = geom_text_outer(mapping = .mapping.geom.text.outer),
+  .stamp.text.hours = stamp_text_hours(),
   .theme = theme_timezone_wheel(),
-  .labs = NULL
+  .facet = NULL,
+  .labs = NULL,
+  .scales = list(NULL, NULL)
 ){
   
   list(
   .coord, 
-  .labs, 
-  .theme, 
   .stamp.segment.pie.cuts,
   .stamp.polygon.circle,
-  .geom.text.inner, 
-  .geom.text.outer
+  .geom.text.places, 
+  .stamp.text.hours,
+  .theme, 
+  .facet,
+  .labs, 
+  .scales
   )
   
 }
 
-theme_timezone_wheel() |> theme_set()
-
-tz_wrangle() |> 
-  ggplot() +
-  aes(label = locations) + 
-  chart_tz_wheel(aes(label = hour_pretty)) + 
-  labs(title = "Virtual meetup coordinators' wheel, Summer 2026",
-       subtitle = "From the ggplot2 extenders ❤️")
-```
-
-![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
-
-``` r
 
 lag_around <- function(x, n){
   
   c(x[(n+1):length(x)], x[1:n])
   
 }
-
-last_plot() + 
-  aes(label = lag_around(locations, 5))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
+## Done! (?)
 
 ``` r
+tribble(~timezone,
+        Sys.timezone(),
+        "Australia/Melbourne", 
+        "Europe/Amsterdam") |>
+  ggplot() + 
+    aes(tz = timezone) + 
+    chart_tz_wheel() + 
+    labs(title = "Virtual meetup coordinators' wheel, Summer 2026")
+```
+
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+# Anatomy of wrapper functions for pies?
+
+So what’s a
+
+The ggplot2 book models the following…
+<https://ggplot2-book.org/programming.html#sec-functions>
+
+``` r
+piechart <- function(data, var) {
+  ggplot(data, aes(factor(1), fill = {{ var }})) +
+    geom_bar(width = 1) + 
+    coord_polar(theta = "y") + 
+    xlab(NULL) + 
+    ylab(NULL)
+}
+```
+
+But following ‘plot helper functions’, we wouldn’t do this. Instead,
+we’d expose our decision as arguments. I take a few more liberties too
+which feel in the spirit of the plot helper functions - just maybe
+pushing that logic a little further:
+
+1.  adding `.labs` and `.mapping` argument following the inclusion of
+    arguments for other plot elements
+2.  change `.geom` argument name to `.layers`, anticipating that all
+    layers would go here - both geoms and stats
+3.  break up `.scales_coord` to separate elements `.scales` and
+    `.coord`. `list()` is used anticipating that multiple scales could
+    be included here.
+
+``` r
+library(ggplot2)
 
 
-
-
-gg_tz_wheel <- function(
-  from_date_time = Sys.Date() |> paste("09:00:00"),
-  from_tz = Sys.timezone(),
-  to_tz = c("Europe/Amsterdam", "Australia/Melbourne", "Europe/Stockholm", 
-            "US/Mountain", "America/Santiago", "Asia/Seoul", "Africa/Kampala"),
-  .data_wrangle = tz_wrangle,
-  .mapping = aes(label = locations),
-  .coord = coord_equal_padded(),
-  .stamp.segment.pie.cuts = stamp_segment_pie_cuts(),
-  .stamp.polygon.circle = stamp_polygon_circle(),
-  .mapping.geom.text.inner = aes(),
-  .mapping.geom.text.outer = aes(label = hour_pretty),
-  .geom.text.inner = geom_text_inner(mapping = .mapping.geom.text.inner),
-  .geom.text.outer = geom_text_outer(mapping = .mapping.geom.text.outer),
-  .theme = theme_timezone_wheel(),
-  .labs = NULL
-){
-
-  .data_wrangle(from_date_time, from_tz, to_tz) |>
-    ggplot() +
-  list(.mapping,
-  .coord,
-  .labs,
-  .theme,
-  .stamp.segment.pie.cuts,
-  .stamp.polygon.circle,
-  .geom.text.inner,
-  .geom.text.outer
-  )
-
+# or (liking this a little more)
+ggpie <- function(data, 
+                  mapping = NULL, 
+                  .data_wrangling = identity,
+                  .mapping = aes(x = factor(1)),
+                  .layers = list(geom_bar(width = 1, position = "fill")), 
+                  .coord = coord_polar(theta = "y"), 
+                  .scales = list(NULL),
+                  .labs = labs(x = NULL, y = NULL),
+                  .other = NULL) {
+  
+  data |> 
+    .data_wrangling() |> # pre-plot data transformation
+    ggplot(mapping = mapping) +
+    list(.mapping, .layers, .coord, .labs, .other) # bundled specification
+  
 }
 
-
-
-gg_tz_wheel()
+ggpie(diamonds, aes(fill = cut))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-10-3.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+In parallel you might create plot-w
 
 ``` r
+chart_pie <- function(.mapping = aes(x = factor(1)),
+                  .layers = geom_bar(width = 1, position = "fill"), 
+                  .coord = coord_polar(theta = "y"), 
+                  .labs = labs(x = NULL, y = NULL),
+                  .other = NULL){
+  
+     list(.mapping, .layers, .coord, .labs, .other)
+  
+}
 
-
-(Sys.time() + hours(3)) |>round_date(unit = "hours")
-#> [1] "2026-08-25 01:00:00 MDT"
-
-gg_tz_wheel(from_date_time =)
-```
-
-![](README_files/figure-gfm/unnamed-chunk-10-4.png)<!-- -->
-
-``` r
-tribble(~city
-        "Melbourne", 
-        "San Francisco") |>
+diamonds |>
   ggplot() + 
-    aes(locale = city) + 
-    chart_tz_wheel()
+  aes(fill = cut) +
+  chart_pie()
 ```
+
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+## alternative ggpie mapped variable argument instead of mapping argument (I think this isn’t as nice, do you?)
+
+``` r
+ggpie <- function(data, 
+                  fill_var, 
+                  .mapping = aes(x = factor(1), fill = {{fill_var}}),
+                  .layers = list(geom_bar(width = 1, position = "fill")), 
+                  .scales = list(NULL),
+                  .coord = coord_polar(theta = "y"), 
+                  .labs = labs(x = NULL, y = NULL),
+                  .other = NULL) {
+  
+  ggplot(data) +
+    list(.mapping, .layers, .coord, .scales, .labs, .other)
+  
+  }
+```
+
+# gg_facet_wrap_months
 
 ``` r
 gg_facet_wrap_months <- 
@@ -553,7 +477,6 @@ gg_facet_wrap_months <-
 ```
 
 ``` r
-
 data_wrangle_facet_wrap_helper <- function(.events_long, date_col){
   
   .events_long |>
