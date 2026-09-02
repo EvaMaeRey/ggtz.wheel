@@ -17,15 +17,13 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 
-
 <!-- badges: end -->
 
+> Schreiben ist wichtig.
 
-> Schreiben ist wichtig.  
+When should you schedule a virtual meeting with a Melbourne based presenter 🦘, if you are hosting from Denver ⛰️, and when it is daylight savings in most of the northern hemisphere and you want folks from around the world to be able to join? This type of question motivates the ggtz.wheel project.
 
-When should you schedule a virtual meeting with a Melbourne based presenter 🦘, if you are hosting from Denver ⛰️, and when it is daylight savings in most of the northern hemisphere and you want folks from around the world to be able to join?  This type of question motivates the ggtz.wheel project.  
-
-The readme for {ggtz.wheel} is especially experimental. In this README, I want to push the boundaries of the narrative-preserving package development framework 'readme-to-package' - and ask the question: 'Can we make package development even more interactive, more chatty, more fun, and much more verbose? Let's see if it can!  Schreiben ist wichtig.
+The readme for {ggtz.wheel} is especially experimental. In this README, I want to push the boundaries of the narrative-preserving package development framework 'readme-to-package' - and ask the question: 'Can we make package development even more interactive, more chatty, more fun, and much more verbose? Let's see if it can! Schreiben ist wichtig.
 
 The 'readme-to-package' workflow (now supported by knitrExtra) allows prose and *package* code to be intermingled (see also the literate packaging tools like litr and fusen frameworks). There may be reasons to move away from these frameworks down the road (given the almost universally accepted that the source lives - in the .R folder). But when an idea is relatively fresh, it is probably deserving of some intense prose-supported thought - some good old fashioned natural language - an amazing and powerful technology ... 🫠
 
@@ -33,29 +31,126 @@ So the intent is that the prose here will go well beyond explanation about what 
 
 Restating, I wanna move away from formulaic, cookbook writing that most of my readme-to-package stuff has been, to full-on Anne Lamont and Katherine May style I-feel-something-and-I'm-gonna-put-it-on-the-page-as-best-I-can... Obviously, not with their skill - it's *my* 'as-best-I-can'.
 
-At the same time, we'll maintain a comforting safe distance to being productive: talk about packaging practices, and write a package, and make a printable timezone wheel, plan the ggdibbler meeting, talk ggplot2 wrappers and personal taste (and try to figure out my wrapping taste even is!) and probably also talk about shiny apps.
+At the same time, we'll maintain a comforting safe distance to being productive: talk about packaging practices, and write a package, and make a printable timezone wheel, plan the ggdibbler meeting, talk personal taste for ggplot2 wrappers -- and try to figure out my wrapping taste even is, maybe think about an accompanying app for the package. Check in with the ggtime crew to see if there are better ways of tackling this!
 
-And hopefully there, I'll check off some to-dos that have been accumulating in my mind, especially from conversations at the 2026 Joint Statistical Meeting in Boston with the ggplot2 extenders group. I've been chatting with all the folks on the WhatsApp JSM2026 group...
+And hopefully in so doing, I'll check off some to-dos that have been accumulating in my mind, especially from conversations at the 2026 Joint Statistical Meeting in Boston with the ggplot2 extenders group. I've been chatting with all the folks on the WhatsApp JSM2026 group...
 
-So ggtz.wheel. What are the precursors? It's predecessor is gglobalclocks. The idea of that project was to build a wall of clocks all set to the local times of different cities and marked with the city names. These walls are something you see in fancy hotels or, in my experience, the Illini Union at the University of Illinois. I find these walls wonderful and whimsical. They're saying: 'Let's think about all these places around the world, and the fact that they are experiencing something totally different right now.' That's fun. And when I planned international ggplot2 extenders meetups, especially those on the other side of the world these walls came to mind. And I thought a gglobalclocks visual could be a visual to show a bunch of local times around the world. Turns out, a wall of clocks visualization didn't feel like a help *whatsoever* in scheduling meetings. Perhaps scanning all the individual clocks felt like too much to take in.
+So ggtz.wheel. Where did you come from? It's predecessor is gglobalclocks. The idea of that project was to build a wall of clocks all set to the local times of different cities and marked with the city names. These walls are something you see in fancy hotels or places like the Illini Union at the University of Illinois where I did grad school. I find these clock walls wonderful and whimsical. They're saying: 'Okay, you! let's think about all these places around the world, and the fact that they are experiencing something totally different right now.' That's fun. And when I planned international ggplot2 extenders meetups, especially those on the other side of the world these walls came to mind. And I thought a gglobalclocks visual could be a visual to show a bunch of local times around the world. As it turns out, a wall of clocks visualization didn't feel like a help *whatsoever* in scheduling meetings. Perhaps scanning all the individual clocks felt like too much to take in.
 
 ![<https://unsplash.com/photos/five-assorted-country-wall-clocks-QrPDA15pRkM>](images/clipboard-3145282378.png)
 
 ![](images/clipboard-3685062784.png)
 
-What did help, and what still lives in the gglobalclocks package, were functions that took a time and location input and output a bunch of local times and locations of attendees.
+What *did* help, and what still lives in the gglobalclocks package, were functions that took a time and location input and output a bunch of local times and locations of attendees.
 
 ![](images/clipboard-3110782751.png)
 
-And then somewhere along the line, what I thought could be a helpful visual was a timezone wheel, which I sketched out here. ☺️
+And then somewhere along the line, what I thought could be a helpful visual was a timezone wheel, which I sketched out here - this spinnable version made it feel like I could not only communicate timezones for a planned meeting, but also pretty easily check what set of local times might work! ☺️
 
 ![](images/clipboard-352571037.png)
 
-And I have written some code up to make this, but it seems like it could be a candidate for a big refactor, and an occasion to think about wrapper function practices... First, let's look at the question of applying the recommendations in '' to just one other simple case: `piechart()` from the chapter programming with ggplot2.  And then we can have a look at the messier feeling case, a gg_tz_wheel case. 
+I wrote some code up for a first draft - first with polar coords and then with cartesian (w equal aspect ratio), [here]() link needed but it seems like it could be a candidate for a big refactor, and an occasion to think about wrapper function practices, one of the topics of the proposed ggplot2 extenders and best practices materials discussed in Boston.
+
+So we'll first take a bit of detour - looking. let's look at the question of applying the recommendations in 'Design Principles for Plot Helper Functions' to just one other simple case: `piechart()` from the chapter programming with ggplot2. The central thesis of 'Design Principles' is don't try to deliver a bunch of within-component 'nobs' as arguments in your wrapper function, instead, the components themselves should be exposed as argments. This should be better for function authors (who then don't need to be concerned with which component-level 'nobs' should be exposed), and better for users, who won't need to guess where a myriad of arguments might take effect within the underlying grammar.
+
+And then we can have a look at the messier feeling case, a gg_tz_wheel case.
+
+# Anatomy of wrapper functions for pies?
+
+The ggplot2 book models the following... <https://ggplot2-book.org/programming.html#sec-functions>
+
+```{r}
+piechart <- function(data, var) {
+  ggplot(data, aes(factor(1), fill = {{ var }})) +
+    geom_bar(width = 1) + 
+    coord_polar(theta = "y") + 
+    xlab(NULL) + 
+    ylab(NULL)
+}
+```
+
+But following 'plot helper functions', we wouldn't do this. Instead, we'd expose our decision as arguments. I take a few more liberties too which feel in the spirit of the plot helper functions - just maybe pushing that logic a little further. Ideas have been sharped via the generous discussion
+
+1.  adding `.labs` and `.mapping` argument following the inclusion of arguments for other plot elements
+2.  change `.geom` argument name to `.layers`, anticipating that all layers would go here - both geoms and stats
+3.  break up `.scales_coord` to separate elements `.scales` and `.coord`. `list()` is used anticipating that multiple scales could be included here.
+
+```{r}
+library(ggplot2)
+
+# or (liking this a little more)
+ggpie <- function(data, 
+                  mapping = aes(), 
+                  #.data_wrangling = identity,
+                  .mapping = aes(x = factor(1)),
+                  .layer1 = geom_bar(width = 1, position = "fill"), 
+                  .coord = coord_polar(theta = "y"), 
+                  .labs = labs(x = NULL, y = NULL),
+                  .other = NULL) {
+  
+  data |> 
+    #.data_wrangling() |> # pre-plot data transformation
+    ggplot(mapping = mapping) +
+    list(.mapping, .layer1, .coord, .labs, .other) # bundled specification
+  
+}
+
+ggpie(diamonds, aes(fill = cut))
+```
+
+In parallel you might create a `chart_*()` function that is designed to
+
+```{r}
+chart_pie <- function(mapping = aes(), 
+    .mapping = aes(x = factor(1)),
+    .layer1 = geom_bar(mapping = mapping, width = 1, position = "fill"), 
+    .coord = coord_polar(theta = "y"), 
+    .labs = labs(x = NULL, y = NULL),
+    .other = NULL){
+  
+     list(.mapping, .layer1, .coord, .labs, .other)
+  
+}
+
+diamonds |>
+  ggplot() + 
+  aes(fill = cut) +
+  chart_pie()
 
 
+diamonds |>
+  ggplot() + 
+  chart_pie(aes(fill = cut))
+```
 
-# ggtz.wheel internals sketch
+## An alternative for ggpie is to follow more closely with the book, and provide 'fill_var'. (I think this isn't as nice, do you?)
+
+<details>
+
+```{r}
+ggpie <- function(data, 
+                  fill_var, 
+                  .mapping = aes(x = factor(1), fill = {{fill_var}}),
+                  .layer1 = geom_bar(width = 1, position = "fill"), 
+                  .coord = coord_polar(theta = "y"), 
+                  .labs = labs(x = NULL, y = NULL),
+                  .other = NULL) {
+  
+  ggplot(data) +
+    list(.mapping, .layers, .coord, .scales, .labs, .other)
+  
+  }
+```
+
+</details>
+
+# A wrapper that supports concise timezone wheels code
+
+For better of for worse, I decided to write a couple of Stats instead of taking the data pre-processing approach described in 'Design Principles'. So the wrapping task is more like ggpie (no data preprocessing) than gg_facet_wrap_months (preprocessing). The Stats and resulting layers have flaws 😢, but are at a point that allows us to look at the wrapping task.
+
+## A peek at how some of the underlying compute works
+
+<details>
 
 ```{r}
 library(tidyverse)
@@ -98,13 +193,17 @@ gglobalclocks:::date_time_tz_to_tzs(
            as.numeric()) |>
   right_join(a_day, by = "hour") |> 
   arrange(-hour)
-  
-
 
 }
 ```
 
-My current approach to this viz, is to create StatAround, which distributes things around a circle, and sets an angle that should be parallel to the spoke, and
+</details>
+
+## StatAround and StatLocalesAround definitions
+
+My current approach to this viz, is to create StatAround, which distributes things around a circle, and sets an angle that should be parallel to the spoke, and StatLocalesAround.
+
+<details>
 
 ```{r}
 compute_panel_around <- function(data, scales, around_start = 0, radius = 1, x0 = 0, y0 = 0){
@@ -172,8 +271,13 @@ tribble(~tz,
         "Africa/Kampala") |> 
   mutate(PANEL = 1) |> 
   compute_panel_locales_around()
+```
 
+</details>
 
+# With the Stats constructed, we can pull together a plot...
+
+```{r}
 tribble(~tz,
         "Europe/Amsterdam", 
         "Australia/Melbourne", 
@@ -200,6 +304,12 @@ tribble(~tz,
   theme_void(base_size = 9, ink = "darkgray")
 ```
 
+## Layer definitions
+
+To allow for greater concision, we define several convenience layers.
+
+<details>
+
 ```{r}
 geom_text_places <- make_constructor(GeomText, stat = StatLocalesAround, radius = .95, hjust = 1)
 stamp_text_hours <- make_constructor(GeomText, stat = StatAround, radius = 1.025, hjust = 0, inherit.aes = FALSE, data = a_day, mapping = aes(label = hour_pretty))
@@ -209,11 +319,14 @@ GeomPolygonHollow <- ggproto("GeomPolygonHollow", GeomPolygon,
                              default_aes = GeomPolygon$default_aes |> 
                                modifyList(aes(color = from_theme(ink), fill = NA)))
 
-stamp_polygon_circle <- make_constructor(GeomPolygonHollow, stat = StatAround, data = data.frame(x = 1:200), inherit.aes = FALSE)
+stamp_polygon_circle <- make_constructor(GeomPolygonHollow, 
+                                         stat = StatAround, 
+                                         data = data.frame(x = 1:200), 
+                                         inherit.aes = FALSE)
 
-theme_timezone_wheel <- function(...){
+theme_timezone_wheel <- function(base_size = 9, ink = "grey20", paper = "white", ...){
   
-  theme_void(base_size = 9, ink = "grey20", ...)
+  theme_void(base_size = base_size, ink = ink, paper = paper,  ...)
   
 }
 
@@ -222,47 +335,39 @@ coord_equal_padded <- function(...){coord_equal(ylim = c(-1.2,1.2),
                                                 xlim = c(-1.2,1.2), ...)}
 ```
 
+</details>
+
+# The proposed wrap: `chart_tz_wheel()`
+
+So finally we come to the proposed wrapper function composition...
+
 ```{r}
 chart_tz_wheel <- function(
-  mapping = aes(),
+  mapping = aes(), 
+  ...,
   .coord = coord_equal_padded(),
-  .geom.text.places = geom_text_places(), 
-  .stamp.segment.pie.cuts = stamp_segment_pie_cuts(),
   .stamp.polygon.circle = stamp_polygon_circle(),
+  .stamp.segment.pie.cuts = stamp_segment_pie_cuts(),
   .stamp.text.hours = stamp_text_hours(),
+  .geom.text.places = geom_text_places(mapping = mapping, ...), 
   .theme = theme_timezone_wheel(),
-  .facet = NULL,
-  .labs = NULL,
-  .scales = list(NULL, NULL)
+  .other = NULL
 ){
   
   list(
   .coord, 
-  .stamp.segment.pie.cuts,
   .stamp.polygon.circle,
-  .geom.text.places, 
+  .stamp.segment.pie.cuts,
   .stamp.text.hours,
-  .theme, 
-  .facet,
-  .labs, 
-  .scales
+  .geom.text.places, 
+  .theme,
+  .other
   )
   
 }
-
-
-# lag_around <- function(x, n){
-#   
-#   c(x[(n+1):length(x)], x[1:n])
-#   
-# }
-
-
-
 ```
 
-## Done! (?)
-
+# Test...
 
 ```{r, eval = T}
 tribble(~timezone,
@@ -284,181 +389,212 @@ tribble(~timezone,
     labs(title = "Virtual meetup coordinators' wheel, Summer 2026")
 
 OlsonNames() |> sample(20)
-```
 
 
-
-# Anatomy of wrapper functions for pies?
-
-So what's a
-
-The ggplot2 book models the following... <https://ggplot2-book.org/programming.html#sec-functions>
-
-```{r}
-piechart <- function(data, var) {
-  ggplot(data, aes(factor(1), fill = {{ var }})) +
-    geom_bar(width = 1) + 
-    coord_polar(theta = "y") + 
-    xlab(NULL) + 
-    ylab(NULL)
-}
-```
-
-But following 'plot helper functions', we wouldn't do this. Instead, we'd expose our decision as arguments. I take a few more liberties too which feel in the spirit of the plot helper functions - just maybe pushing that logic a little further:
-
-1.  adding `.labs` and `.mapping` argument following the inclusion of arguments for other plot elements
-2.  change `.geom` argument name to `.layers`, anticipating that all layers would go here - both geoms and stats
-3.  break up `.scales_coord` to separate elements `.scales` and `.coord`. `list()` is used anticipating that multiple scales could be included here.
-
-```{r}
-library(ggplot2)
-
-
-# or (liking this a little more)
-ggpie <- function(data, 
-                  mapping = NULL, 
-                  .data_wrangling = identity,
-                  .mapping = aes(x = factor(1)),
-                  .layers = list(geom_bar(width = 1, position = "fill")), 
-                  .coord = coord_polar(theta = "y"), 
-                  .scales = list(NULL),
-                  .labs = labs(x = NULL, y = NULL),
-                  .other = NULL) {
-  
-  data |> 
-    .data_wrangling() |> # pre-plot data transformation
-    ggplot(mapping = mapping) +
-    list(.mapping, .layers, .coord, .labs, .other) # bundled specification
-  
-}
-
-ggpie(diamonds, aes(fill = cut))
-```
-
-In parallel you might create plot-w
-
-```{r}
-chart_pie <- function(.mapping = aes(x = factor(1)),
-                  .layers = geom_bar(width = 1, position = "fill"), 
-                  .coord = coord_polar(theta = "y"), 
-                  .labs = labs(x = NULL, y = NULL),
-                  .other = NULL){
-  
-     list(.mapping, .layers, .coord, .labs, .other)
-  
-}
-
-diamonds |>
+tribble(~timezone,
+        "America/Denver",
+        "America/New_York",
+        "Australia/Melbourne") |>
   ggplot() + 
-  aes(fill = cut) +
-  chart_pie()
+    labs(title = "Virtual meetup coordinators' wheel, Summer 2026") + 
+    chart_tz_wheel(aes(tz = timezone), from_date_time = "2026-09-02 10:00:00")
 ```
 
-## alternative ggpie mapped variable argument instead of mapping argument (I think this isn't as nice, do you?)
+# In Shiny
 
-```{r}
-ggpie <- function(data, 
-                  fill_var, 
-                  .mapping = aes(x = factor(1), fill = {{fill_var}}),
-                  .layers = list(geom_bar(width = 1, position = "fill")), 
-                  .scales = list(NULL),
-                  .coord = coord_polar(theta = "y"), 
-                  .labs = labs(x = NULL, y = NULL),
-                  .other = NULL) {
-  
-  ggplot(data) +
-    list(.mapping, .layers, .coord, .scales, .labs, .other)
-  
-  }
+```{r, eval = F}
+library(shiny)
 
+# Define UI for application that draws a histogram
+ui <- fluidPage(
 
+    # Application title
+    titlePanel("Now a coordinators' wheel"),
 
-```
+    # Sidebar with a slider input for number of bins 
+    sidebarLayout(
+        sidebarPanel(
+            sliderInput("hr",
+                        "Start hour Denver:",
+                        min = 1,
+                        max = 23,
+                        value = 10, step = 1)
+        ),
 
+        # Show a plot of the generated distribution
+        mainPanel(
+           plotOutput("distPlot")
+        )
+    )
+)
 
-# gg_facet_wrap_months
+# Define server logic required to draw a histogram
+server <- function(input, output) {
 
-```{r}
-gg_facet_wrap_months <- 
-  function (.events_long, date_col, locale = NULL, week_start = NULL, 
-          nrow = NULL, ncol = NULL, 
-          .geom = list(geom_tile(color = "grey70", fill = "transparent"), 
-                       geom_text(nudge_y = 0.25)), 
-          .scale_coord = list(scale_y_reverse(), 
-                              scale_x_discrete(position = "top"), 
-                              coord_fixed(expand = TRUE)), 
-          .theme = list(theme_bw_tilecal()), 
-          .other = list()) {
-    
-    cal_data <- calc_calendar_vars(fill_missing_units(.events_long, 
-          {{date_col}}), {{date_col }})
-    
-    ggplot2::ggplot(
-      cal_data, 
-      mapping = aes_string(x = "TC_wday_label", 
-                           y = "TC_month_week", label = "TC_mday")) + 
-      facet_wrap(c("TC_month_label"), 
-        axes = "all_x", nrow = nrow, ncol = ncol) + 
-      labs(y = NULL, x = NULL) + 
-      .geom + 
-      .scale_coord + 
-      .theme + 
-      .other
+    output$distPlot <- renderPlot({
+
+      tribble(~timezone,
+        "America/Denver",
+        "America/New_York",
+        "Australia/Melbourne") |>
+  ggplot() + 
+    labs(title = "Virtual meetup coordinators' wheel, Summer 2026") + 
+    chart_tz_wheel(aes(tz = timezone), 
+                   from_date_time = "2026-09-02 " |> paste0(input$hr |> str_pad(width = 2),  ":00:00")
+                   
+                   )
+      
+    })
 }
 
+# Run the application 
+shinyApp(ui = ui, server = server)
+
+
+
+
 ```
 
-```{r}
-data_wrangle_facet_wrap_helper <- function(.events_long, date_col){
-  
-  .events_long |>
-  ggtilecal::fill_missing_units(date_col = {{date_col}}) |> 
-  ggtilecal::calc_calendar_vars(date_col = {{date_col}})
-  
-}
+![](images/clipboard-700063936.png)
 
+<!-- # gg_facet_wrap_months -->
 
-gg_facet_wrap_months <- 
-  function (.events_long, 
-            date_col, 
-            locale = NULL, 
-            week_start = NULL, 
-            nrow = NULL, 
-            ncol = NULL, 
-            mapping = aes(), 
-            .data_wrangling = data_wrangle_facet_wrap_helper,
-            .mapping = aes(x = TC_wday_label, 
-                           y = TC_month_week, 
-                           label = TC_mday),
-            .layers = list(geom_tile(color = "grey70", fill = "transparent"), 
-                           geom_text(nudge_y = 0.25)), 
-            .scales = list(scale_y_reverse(), 
-                           scale_x_discrete(position = "top")),
-            .coord =  coord_fixed(expand = TRUE), 
-            .theme = ggtilecal::theme_bw_tilecal(),
-            .labs = labs(y = NULL, x = NULL),
-            .facet = facet_wrap(c("TC_month_label"), axes = "all_x", nrow = nrow, ncol = ncol),
-            .other = NULL 
-          ) {
-    
-    .events_long |> 
-      .data_wrangling(date_col = {{date_col}}) |>
-      ggplot(mapping = mapping) + 
-      list(.mapping,
-           .layers,
-           .scales,
-           .coord,
-           .theme,
-           .labs,
-           .facet,
-           .other)
+<!-- ```{r} -->
 
-  }
+<!-- gg_facet_wrap_months <-  -->
 
+<!--   function (.events_long, date_col, locale = NULL, week_start = NULL,  -->
 
-ggtilecal::make_empty_month_days(c("2024-01-05", "2024-06-30")) |>
-  gg_facet_wrap_months(date_col = unit_date) 
+<!--           nrow = NULL, ncol = NULL,  -->
 
-```
+<!--           .geom = list(geom_tile(color = "grey70", fill = "transparent"),  -->
+
+<!--                        geom_text(nudge_y = 0.25)),  -->
+
+<!--           .scale_coord = list(scale_y_reverse(),  -->
+
+<!--                               scale_x_discrete(position = "top"),  -->
+
+<!--                               coord_fixed(expand = TRUE)),  -->
+
+<!--           .theme = list(theme_bw_tilecal()),  -->
+
+<!--           .other = list()) { -->
+
+<!--     cal_data <- calc_calendar_vars(fill_missing_units(.events_long,  -->
+
+<!--           {{date_col}}), {{date_col }}) -->
+
+<!--     ggplot2::ggplot( -->
+
+<!--       cal_data,  -->
+
+<!--       mapping = aes_string(x = "TC_wday_label",  -->
+
+<!--                            y = "TC_month_week", label = "TC_mday")) +  -->
+
+<!--       facet_wrap(c("TC_month_label"),  -->
+
+<!--         axes = "all_x", nrow = nrow, ncol = ncol) +  -->
+
+<!--       labs(y = NULL, x = NULL) +  -->
+
+<!--       .geom +  -->
+
+<!--       .scale_coord +  -->
+
+<!--       .theme +  -->
+
+<!--       .other -->
+
+<!-- } -->
+
+<!-- ``` -->
+
+<!-- ```{r} -->
+
+<!-- data_wrangle_facet_wrap_helper <- function(.events_long, date_col){ -->
+
+<!--   .events_long |> -->
+
+<!--   ggtilecal::fill_missing_units(date_col = {{date_col}}) |>  -->
+
+<!--   ggtilecal::calc_calendar_vars(date_col = {{date_col}}) -->
+
+<!-- } -->
+
+<!-- gg_facet_wrap_months <-  -->
+
+<!--   function (.events_long,  -->
+
+<!--             date_col,  -->
+
+<!--             locale = NULL,  -->
+
+<!--             week_start = NULL,  -->
+
+<!--             nrow = NULL,  -->
+
+<!--             ncol = NULL,  -->
+
+<!--             mapping = aes(),  -->
+
+<!--             .data_wrangling = data_wrangle_facet_wrap_helper, -->
+
+<!--             .mapping = aes(x = TC_wday_label,  -->
+
+<!--                            y = TC_month_week,  -->
+
+<!--                            label = TC_mday), -->
+
+<!--             .layers = list(geom_tile(color = "grey70", fill = "transparent"),  -->
+
+<!--                            geom_text(nudge_y = 0.25)),  -->
+
+<!--             .scales = list(scale_y_reverse(),  -->
+
+<!--                            scale_x_discrete(position = "top")), -->
+
+<!--             .coord =  coord_fixed(expand = TRUE),  -->
+
+<!--             .theme = ggtilecal::theme_bw_tilecal(), -->
+
+<!--             .labs = labs(y = NULL, x = NULL), -->
+
+<!--             .facet = facet_wrap(c("TC_month_label"), axes = "all_x", nrow = nrow, ncol = ncol), -->
+
+<!--             .other = NULL  -->
+
+<!--           ) { -->
+
+<!--     .events_long |>  -->
+
+<!--       .data_wrangling(date_col = {{date_col}}) |> -->
+
+<!--       ggplot(mapping = mapping) +  -->
+
+<!--       list(.mapping, -->
+
+<!--            .layers, -->
+
+<!--            .scales, -->
+
+<!--            .coord, -->
+
+<!--            .theme, -->
+
+<!--            .labs, -->
+
+<!--            .facet, -->
+
+<!--            .other) -->
+
+<!--   } -->
+
+<!-- ggtilecal::make_empty_month_days(c("2024-01-05", "2024-06-30")) |> -->
+
+<!--   gg_facet_wrap_months(date_col = unit_date)  -->
+
+<!-- ``` -->
 
 ![](images/clipboard-854555645.png)
