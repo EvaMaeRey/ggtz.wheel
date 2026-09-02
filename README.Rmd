@@ -123,7 +123,7 @@ diamonds |>
   chart_pie(aes(fill = cut))
 ```
 
-## An alternative for ggpie is to follow more closely with the book, and provide 'fill_var'. (I think this isn't as nice, do you?)
+# An alternative for ggpie is to follow more closely with the book, and provide 'fill_var'. (I think this isn't as nice, do you?)
 
 <details>
 
@@ -148,7 +148,7 @@ ggpie <- function(data,
 
 For better of for worse, I decided to write a couple of Stats instead of taking the data pre-processing approach described in 'Design Principles'. So the wrapping task is more like ggpie (no data preprocessing) than gg_facet_wrap_months (preprocessing). The Stats and resulting layers have flaws 😢, but are at a point that allows us to look at the wrapping task.
 
-## A peek at how some of the underlying compute works
+# A peek at how some of the underlying compute works
 
 <details>
 
@@ -199,7 +199,7 @@ gglobalclocks:::date_time_tz_to_tzs(
 
 </details>
 
-## StatAround and StatLocalesAround definitions
+# StatAround and StatLocalesAround definitions
 
 My current approach to this viz, is to create StatAround, which distributes things around a circle, and sets an angle that should be parallel to the spoke, and StatLocalesAround.
 
@@ -304,7 +304,7 @@ tribble(~tz,
   theme_void(base_size = 9, ink = "darkgray")
 ```
 
-## Layer definitions
+# Layer definitions
 
 To allow for greater concision, we define several convenience layers.
 

@@ -207,7 +207,7 @@ diamonds |>
 
 ![](README_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
 
-## An alternative for ggpie is to follow more closely with the book, and provide ‘fill_var’. (I think this isn’t as nice, do you?)
+# An alternative for ggpie is to follow more closely with the book, and provide ‘fill_var’. (I think this isn’t as nice, do you?)
 
 <details>
 
@@ -237,7 +237,7 @@ preprocessing) than gg_facet_wrap_months (preprocessing). The Stats and
 resulting layers have flaws 😢, but are at a point that allows us to
 look at the wrapping task.
 
-## A peek at how some of the underlying compute works
+# A peek at how some of the underlying compute works
 
 <details>
 
@@ -306,7 +306,7 @@ gglobalclocks:::date_time_tz_to_tzs(
 
 </details>
 
-## StatAround and StatLocalesAround definitions
+# StatAround and StatLocalesAround definitions
 
 My current approach to this viz, is to create StatAround, which
 distributes things around a circle, and sets an angle that should be
@@ -425,7 +425,7 @@ tribble(~tz,
 
 ![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
-## Layer definitions
+# Layer definitions
 
 To allow for greater concision, we define several convenience layers.
 
@@ -515,13 +515,16 @@ tribble(~timezone,
 ``` r
 
 OlsonNames() |> sample(20)
-#>  [1] "Asia/Seoul"            "Etc/GMT-14"            "America/Tijuana"      
-#>  [4] "America/Swift_Current" "Europe/Belgrade"       "Antarctica/Rothera"   
-#>  [7] "Asia/Aqtau"            "Atlantic/Stanley"      "America/Matamoros"    
-#> [10] "America/Cayenne"       "Antarctica/Troll"      "Europe/Minsk"         
-#> [13] "US/Hawaii"             "Indian/Kerguelen"      "Africa/El_Aaiun"      
-#> [16] "Atlantic/St_Helena"    "America/Knox_IN"       "Asia/Tomsk"           
-#> [19] "Europe/Kaliningrad"    "Indian/Maldives"
+#>  [1] "America/Lima"               "America/Sao_Paulo"         
+#>  [3] "Asia/Tel_Aviv"              "America/Port_of_Spain"     
+#>  [5] "America/Vancouver"          "Asia/Almaty"               
+#>  [7] "America/Argentina/San_Juan" "Asia/Thimbu"               
+#>  [9] "MET"                        "Canada/Saskatchewan"       
+#> [11] "Europe/Oslo"                "America/Mexico_City"       
+#> [13] "Indian/Cocos"               "America/Adak"              
+#> [15] "Africa/Mbabane"             "America/Nome"              
+#> [17] "Australia/North"            "GMT+0"                     
+#> [19] "Etc/UTC"                    "America/Argentina/Jujuy"
 
 
 tribble(~timezone,
