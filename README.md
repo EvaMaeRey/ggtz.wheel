@@ -5,21 +5,32 @@
 
 <!-- badges: start -->
 
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+
 <!-- badges: end -->
 
 > Schreiben ist wichtig.
 
-When should you schedule a virtual meeting with a Melbourne based
-presenter 🦘, if you are hosting from Denver ⛰️, and when it is daylight
-savings in most of the northern hemisphere and you want folks from
-around the world to be able to join? This type of question motivates the
-ggtz.wheel project.
+For what time should you schedule a virtual meeting with the
+characteristics:
 
-The readme for {ggtz.wheel} is especially experimental. In this README,
-I want to push the boundaries of the narrative-preserving package
-development framework ‘readme-to-package’ - and ask the question: ’Can
-we make package development even more interactive, more chatty, more
-fun, and much more verbose? Let’s see if it can! Schreiben ist wichtig.
+- a Melbourne based presenter 🦘,
+
+- you are hosting from Denver ⛰️,
+
+- it is daylight savings in most of the northern hemisphere
+
+- you want folks from around the world to be able to join?
+
+This type of question motivates the ggtz.wheel project.
+
+The *readme* for {ggtz.wheel} is especially experimental. In this
+README, I want to push the boundaries of the narrative-preserving
+package development framework ‘readme-to-package’ - and ask the
+question: ’Can we make package development even more interactive, more
+chatty, more fun, and much more verbose? Let’s see if it can! Schreiben.
+Ist. Wichtig.
 
 The ‘readme-to-package’ workflow (now supported by knitrExtra) allows
 prose and *package* code to be intermingled (see also the literate
@@ -47,12 +58,12 @@ I-feel-something-and-I’m-gonna-put-it-on-the-page-as-best-I-can…
 Obviously, not with their skill - it’s *my* ‘as-best-I-can’.
 
 At the same time, we’ll maintain a comforting safe distance to being
-productive: talk about packaging practices, and write a package, and
-make a printable timezone wheel, plan the ggdibbler meeting, talk
-personal taste for ggplot2 wrappers – and try to figure out my wrapping
-taste even is, maybe think about an accompanying app for the package.
-Check in with the ggtime crew to see if there are better ways of
-tackling this!
+productive: talk about minimal packaging practices, and write a package,
+and make a printable timezone wheel, plan the ggdibbler meeting, talk
+personal taste for ggplot2 wrappers – and try to figure out what my
+wrapping taste even is, maybe think about an accompanying app for the
+package. Check in with the ggtime crew to see if there are better ways
+of tackling this!
 
 And hopefully in so doing, I’ll check off some to-dos that have been
 accumulating in my mind, especially from conversations at the 2026 Joint
@@ -94,8 +105,8 @@ local times and locations of attendees.
 And then somewhere along the line, what I thought could be a helpful
 visual was a timezone wheel, which I sketched out here - this spinnable
 version made it feel like I could not only communicate timezones for a
-planned meeting, but also pretty easily check what set of local times
-might work! ☺️
+planned meeting, but also help you figure our the set of local times
+that might work! ☺️
 
 ![](images/clipboard-352571037.png)
 
@@ -116,10 +127,12 @@ themselves should be exposed as argments. This should be better for
 function authors (who then don’t need to be concerned with which
 component-level ‘nobs’ should be exposed), and better for users, who
 won’t need to guess where a myriad of arguments might take effect within
-the underlying grammar.
+the underlying grammar. It’s insightful stuff.
 
-And then we can have a look at the messier feeling case, a gg_tz_wheel
-case.
+So we’ll look at applying a version of this (more my taste than
+following to the letter what’s modeled in ’Design Principles). And then
+we can have a look at the messier feeling case, creating
+`chart_tz_wheel`.
 
 # Anatomy of wrapper functions for pies?
 
@@ -252,11 +265,11 @@ library(tidyverse)
 #> ✖ dplyr::filter() masks stats::filter()
 #> ✖ dplyr::lag()    masks stats::lag()
 #> ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
-a_day <- tibble(hour = 1:24, 
+a_day <- tibble::tibble(hour = 1:24, 
        hour_pretty = rep(1:12, 2) |> 
          paste(c(rep("AM", 11), "noon",
                c(rep("PM", 11), "midnight"))) |>
-         str_remove("12 "))
+         stringr::str_remove("12 "))
 
 gglobalclocks:::date_time_tz_to_tzs(
   from_date_time = "2024-03-27 12:00:00", 
@@ -278,6 +291,46 @@ gglobalclocks:::date_time_tz_to_tzs(
 #> 6 Adelaide             2024-03-28 02:30:00 02:30         Thu, Mar 28         2
 ```
 
+We’ll actually clone the code from gglobalclocks…
+
+``` r
+# cloning from gglobalclocks 🤷‍♀️
+time_to_local <- function (x, tz) {
+    lubridate::with_tz(x, tz = tz) %>% as.character()
+}
+
+date_time_tz_to_tzs <- function (from_date_time = "2024-03-27 12:00:00", from_tz = "US/Eastern", 
+    to_tz = c("Europe/Amsterdam", "Australia/Adelaide", "Europe/Stockholm", 
+        "US/Mountain", "America/Santiago", "Asia/Seoul")) 
+{
+    meeting <- ymd_hms(from_date_time, tz = from_tz)
+    OlsonNames() %>% data.frame(tz = .) %>% dplyr::filter(tz != 
+        "US/Pacific-New") %>% dplyr::filter(tz %in% to_tz) %>% 
+        dplyr::mutate(local_date_time_chr = purrr::map2(meeting, 
+            tz, time_to_local)) %>% tidyr::unnest(local_date_time_chr) %>% 
+        dplyr::mutate(local_date_time_utc = lubridate::ymd_hms(local_date_time_chr, 
+            tz = "UTC")) %>% dplyr::mutate(local_time_hms = hms::as_hms(local_date_time_utc)) %>% 
+        dplyr::mutate(local_time_hm = local_time_hms %>% str_remove("...$")) %>% 
+        dplyr::mutate(local_date = as.Date(local_date_time_chr)) %>% 
+        dplyr::mutate(local_wday = lubridate::wday(local_date, 
+            label = T)) %>% dplyr::arrange(local_date, local_time_hm) %>% 
+        dplyr::select(-local_date_time_chr) %>% dplyr::mutate(local_wday_date = paste0(local_wday, 
+        ", ", month(local_date, label = T), " ", day(local_date)))
+}
+
+
+local_tzs_df_collapse <- function (local_tzs_df, collapse = "; ") 
+{
+    select(select(mutate(arrange(mutate(select(ungroup(summarise(group_by(local_tzs_df, 
+        local_date, local_date_time_utc, local_time_hm, local_wday_date), 
+        locations = paste(tz, collapse = collapse))), locations, 
+        everything()), locations = str_remove_all(locations, 
+        "Europe/|America/|Australia/")), local_date_time_utc), 
+        locations = fct_inorder(locations)), -local_date), everything(), 
+        local_date_time_utc)
+}
+```
+
 ``` r
 tz_wrangle <- function(from_date_time = "2024-03-27 12:00:00", 
   from_tz = "US/Eastern", 
@@ -290,11 +343,11 @@ tz_wrangle <- function(from_date_time = "2024-03-27 12:00:00",
                c(rep("PM", 11), "midnight"))) |>
          str_remove("12 "))
 
-gglobalclocks:::date_time_tz_to_tzs(
+date_time_tz_to_tzs(
   from_date_time = from_date_time, 
   from_tz = from_tz, 
   to_tz = to_tz) |>
-  gglobalclocks:::local_tzs_df_collapse() |> 
+  local_tzs_df_collapse() |> 
   mutate(hour = local_time_hm |> 
            str_extract("\\d+") |> 
            as.numeric()) |>
@@ -315,11 +368,12 @@ parallel to the spoke, and StatLocalesAround.
 <details>
 
 ``` r
+#' @export
 compute_panel_around <- function(data, scales, around_start = 0, radius = 1, x0 = 0, y0 = 0){
   
   data |> 
-    mutate(row_id = row_number()) |> 
-    mutate(around = - 2 * pi * row_id/n() - around_start * 2*pi / 360,
+    mutate(row_id = dplyr::row_number()) |> 
+    mutate(around = - 2 * pi * row_id/dplyr::n() - around_start * 2*pi / 360,
            x = radius*cos(around) + x0, 
            y = radius*sin(around) + y0,
            angle = 360*around/(2*pi),
@@ -329,47 +383,54 @@ compute_panel_around <- function(data, scales, around_start = 0, radius = 1, x0 
 
 }
 
-StatAround <- ggproto("StatAround", Stat, 
+#' @export
+StatAround <- ggplot2::ggproto("StatAround", ggplot2::Stat, 
                       compute_panel = compute_panel_around,
-                      default_aes = aes(hjust = after_stat(1), 
-                                        xend = after_stat(x0),
-                                        yend = after_stat(y0)))
+                      default_aes = ggplot2::aes(hjust = ggplot2::after_stat(1), 
+                                        xend = ggplot2::after_stat(x0),
+                                        yend = ggplot2::after_stat(y0)))
 
 
-a_day <- tibble(hour = 1:24, 
+a_day <- tibble::tibble(hour = 1:24, 
        hour_pretty = rep(1:12, 2) |> 
          paste(c(rep("AM", 11), "noon",
                c(rep("PM", 11), "midnight"))) |>
-         str_remove("12 "))
+         stringr::str_remove("12 "))
 
+#' @export
 compute_panel_locales_around <- function(data, scales, around_start = 0, radius = 1, x0 = 0, y0 = 0, 
                                          from_date_time = Sys.Date() |> paste("09:00:00"), from_tz = Sys.timezone()){
   
-  gglobalclocks:::date_time_tz_to_tzs(
+  date_time_tz_to_tzs(
     from_date_time = from_date_time, 
     from_tz = from_tz, 
     to_tz = data$tz) |>
-  gglobalclocks:::local_tzs_df_collapse() |> 
-  mutate(hour = local_time_hm |> 
-           str_extract("\\d+") |> 
+  local_tzs_df_collapse() |> 
+  dplyr::mutate(hour = local_time_hm |> 
+           stringr::str_extract("\\d+") |> 
            as.numeric())  |>
-  right_join(a_day, by = "hour") |> 
-  arrange(hour) |> 
-  compute_panel_around(scales = scales, around_start = around_start, radius = radius, x0 = x0, y0 = y0) |>
-  filter_out(is.na(locations)) |> 
-  mutate(PANEL = 1) # not the best, Gina, not the best...
+  dplyr::right_join(a_day, by = "hour") |> 
+  dplyr::arrange(hour) |> 
+  compute_panel_around(scales = scales, 
+                       around_start = around_start, 
+                       radius = radius, 
+                       x0 = x0, 
+                       y0 = y0) |>
+  dplyr::filter_out(is.na(locations)) |> 
+  dplyr::mutate(PANEL = 1) # not the best, Gina, not the best...
 
 }
 
-StatLocalesAround <- ggproto("StatLocalesAround", Stat, 
+#' @export
+StatLocalesAround <- ggplot2::ggproto("StatLocalesAround", ggplot2::Stat, 
                       compute_panel = compute_panel_locales_around,
-                      default_aes = aes(hjust = after_stat(1), 
-                                        label = after_stat(locations),
-                                        xend = after_stat(x0),
-                                        yend = after_stat(y0)))
+                      default_aes = ggplot2::aes(hjust = ggplot2::after_stat(1), 
+                                        label = ggplot2::after_stat(locations),
+                                        xend = ggplot2::after_stat(x0),
+                                        yend = ggplot2::after_stat(y0)))
+```
 
-
-
+``` r
 tribble(~tz,
         "Europe/Amsterdam", 
         "Australia/Melbourne", 
@@ -380,14 +441,21 @@ tribble(~tz,
         "Africa/Kampala") |> 
   mutate(PANEL = 1) |> 
   compute_panel_locales_around()
+#> `summarise()` has regrouped the output.
+#> ℹ Summaries were computed grouped by local_date, local_date_time_utc,
+#>   local_time_hm, and local_wday_date.
+#> ℹ Output is grouped by local_date, local_date_time_utc, and local_time_hm.
+#> ℹ Use `summarise(.groups = "drop_last")` to silence this message.
+#> ℹ Use `summarise(.by = c(local_date, local_date_time_utc, local_time_hm,
+#>   local_wday_date))` for per-operation grouping (`?dplyr::dplyr_by`) instead.
 #> # A tibble: 5 × 14
 #>   locations  local_date_time_utc local_time_hm local_wday_date  hour hour_pretty
 #>   <fct>      <dttm>              <chr>         <chr>           <dbl> <chr>      
-#> 1 Melbourne  2026-09-03 01:00:00 01:00         Thu, Sep 3          1 1 AM       
-#> 2 US/Mounta… 2026-09-02 09:00:00 09:00         Wed, Sep 2          9 9 AM       
-#> 3 Santiago   2026-09-02 11:00:00 11:00         Wed, Sep 2         11 11 AM      
-#> 4 Amsterdam… 2026-09-02 17:00:00 17:00         Wed, Sep 2         17 5 PM       
-#> 5 Africa/Ka… 2026-09-02 18:00:00 18:00         Wed, Sep 2         18 6 PM       
+#> 1 Melbourne  2026-09-04 01:00:00 01:00         Fri, Sep 4          1 1 AM       
+#> 2 US/Mounta… 2026-09-03 09:00:00 09:00         Thu, Sep 3          9 9 AM       
+#> 3 Santiago   2026-09-03 11:00:00 11:00         Thu, Sep 3         11 11 AM      
+#> 4 Amsterdam… 2026-09-03 17:00:00 17:00         Thu, Sep 3         17 5 PM       
+#> 5 Africa/Ka… 2026-09-03 18:00:00 18:00         Thu, Sep 3         18 6 PM       
 #> # ℹ 8 more variables: row_id <int>, around <dbl>, x <dbl>, y <dbl>,
 #> #   angle <dbl>, x0 <dbl>, y0 <dbl>, PANEL <dbl>
 ```
@@ -421,6 +489,13 @@ tribble(~tz,
   labs(title = "Virtual meetup coordinators' wheel, Summer 2026",
        subtitle = "From the ggplot2 extenders ❤️") + 
   theme_void(base_size = 9, ink = "darkgray")
+#> `summarise()` has regrouped the output.
+#> ℹ Summaries were computed grouped by local_date, local_date_time_utc,
+#>   local_time_hm, and local_wday_date.
+#> ℹ Output is grouped by local_date, local_date_time_utc, and local_time_hm.
+#> ℹ Use `summarise(.groups = "drop_last")` to silence this message.
+#> ℹ Use `summarise(.by = c(local_date, local_date_time_utc, local_time_hm,
+#>   local_wday_date))` for per-operation grouping (`?dplyr::dplyr_by`) instead.
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
@@ -432,26 +507,34 @@ To allow for greater concision, we define several convenience layers.
 <details>
 
 ``` r
-geom_text_places <- make_constructor(GeomText, stat = StatLocalesAround, radius = .95, hjust = 1)
-stamp_text_hours <- make_constructor(GeomText, stat = StatAround, radius = 1.025, hjust = 0, inherit.aes = FALSE, data = a_day, mapping = aes(label = hour_pretty))
-stamp_segment_pie_cuts <- make_constructor(GeomSegment, stat = StatAround, around_start = pi/24 + 1, linetype = "dotted", inherit.aes = FALSE, data = a_day, mapping = aes(label = hour_pretty))
+#' @export
+geom_text_places <- ggplot2::make_constructor(ggplot2::GeomText, stat = StatLocalesAround, radius = .95, hjust = 1)
 
-GeomPolygonHollow <- ggproto("GeomPolygonHollow", GeomPolygon,
-                             default_aes = GeomPolygon$default_aes |> 
-                               modifyList(aes(color = from_theme(ink), fill = NA)))
+#' @export
+stamp_text_hours <- ggplot2::make_constructor(ggplot2::GeomText, stat = StatAround, radius = 1.025, hjust = 0, inherit.aes = FALSE, data = a_day, mapping = ggplot2::aes(label = hour_pretty))
 
-stamp_polygon_circle <- make_constructor(GeomPolygonHollow, 
+#' @export
+stamp_segment_pie_cuts <- ggplot2::make_constructor(ggplot2::GeomSegment, stat = StatAround, around_start = pi/24 + 1, linetype = "dotted", inherit.aes = FALSE, data = a_day, mapping = ggplot2::aes(label = hour_pretty))
+
+#' @export
+GeomPolygonHollow <- ggplot2::ggproto("GeomPolygonHollow", ggplot2::GeomPolygon,
+                             default_aes = ggplot2::GeomPolygon$default_aes |> 
+                               modifyList(ggplot2::aes(color = ggplot2::from_theme(ink), fill = NA)))
+
+#' @export
+stamp_polygon_circle <- ggplot2::make_constructor(GeomPolygonHollow, 
                                          stat = StatAround, 
                                          data = data.frame(x = 1:200), 
                                          inherit.aes = FALSE)
 
+#' @export
 theme_timezone_wheel <- function(base_size = 9, ink = "grey20", paper = "white", ...){
   
   theme_void(base_size = base_size, ink = ink, paper = paper,  ...)
   
 }
 
-
+#' @export
 coord_equal_padded <- function(...){coord_equal(ylim = c(-1.2,1.2), 
                                                 xlim = c(-1.2,1.2), ...)}
 ```
@@ -463,8 +546,9 @@ coord_equal_padded <- function(...){coord_equal(ylim = c(-1.2,1.2),
 So finally we come to the proposed wrapper function composition…
 
 ``` r
+#' @export
 chart_tz_wheel <- function(
-  mapping = aes(), 
+  mapping = ggplot2::aes(), 
   ...,
   .coord = coord_equal_padded(),
   .stamp.polygon.circle = stamp_polygon_circle(),
@@ -508,23 +592,27 @@ tribble(~timezone,
     aes(tz = timezone) + 
     chart_tz_wheel() + 
     labs(title = "Virtual meetup coordinators' wheel, Summer 2026")
+#> `summarise()` has regrouped the output.
+#> ℹ Summaries were computed grouped by local_date, local_date_time_utc,
+#>   local_time_hm, and local_wday_date.
+#> ℹ Output is grouped by local_date, local_date_time_utc, and local_time_hm.
+#> ℹ Use `summarise(.groups = "drop_last")` to silence this message.
+#> ℹ Use `summarise(.by = c(local_date, local_date_time_utc, local_time_hm,
+#>   local_wday_date))` for per-operation grouping (`?dplyr::dplyr_by`) instead.
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 
 OlsonNames() |> sample(20)
-#>  [1] "America/Lima"               "America/Sao_Paulo"         
-#>  [3] "Asia/Tel_Aviv"              "America/Port_of_Spain"     
-#>  [5] "America/Vancouver"          "Asia/Almaty"               
-#>  [7] "America/Argentina/San_Juan" "Asia/Thimbu"               
-#>  [9] "MET"                        "Canada/Saskatchewan"       
-#> [11] "Europe/Oslo"                "America/Mexico_City"       
-#> [13] "Indian/Cocos"               "America/Adak"              
-#> [15] "Africa/Mbabane"             "America/Nome"              
-#> [17] "Australia/North"            "GMT+0"                     
-#> [19] "Etc/UTC"                    "America/Argentina/Jujuy"
+#>  [1] "Asia/Samarkand"      "Mexico/General"      "Africa/Brazzaville" 
+#>  [4] "America/Recife"      "Pacific/Kiritimati"  "America/Yakutat"    
+#>  [7] "Canada/Central"      "Indian/Cocos"        "America/Montevideo" 
+#> [10] "America/Panama"      "EET"                 "Asia/Yekaterinburg" 
+#> [13] "Cuba"                "Asia/Kathmandu"      "Europe/Gibraltar"   
+#> [16] "Indian/Mahe"         "America/Fort_Nelson" "Africa/Niamey"      
+#> [19] "Asia/Dacca"          "US/East-Indiana"
 
 
 tribble(~timezone,
@@ -534,9 +622,93 @@ tribble(~timezone,
   ggplot() + 
     labs(title = "Virtual meetup coordinators' wheel, Summer 2026") + 
     chart_tz_wheel(aes(tz = timezone), from_date_time = "2026-09-02 10:00:00")
+#> `summarise()` has regrouped the output.
+#> ℹ Summaries were computed grouped by local_date, local_date_time_utc,
+#>   local_time_hm, and local_wday_date.
+#> ℹ Output is grouped by local_date, local_date_time_utc, and local_time_hm.
+#> ℹ Use `summarise(.groups = "drop_last")` to silence this message.
+#> ℹ Use `summarise(.by = c(local_date, local_date_time_utc, local_time_hm,
+#>   local_wday_date))` for per-operation grouping (`?dplyr::dplyr_by`) instead.
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
+
+# Make it a minimally viable package
+
+Okay, so far this is *just* code and prose. But I gotta make it a
+package if I expect anyone to play with the interface and give feedback
+based on that. Let’s see how long it takes.
+
+``` r
+usethis::create_package(".")
+```
+
+Adding a lifecycle badge isn’t essential to writing a minimal package
+but it is kind of fun and says ‘I know this isn’t prefect - I’m aware!’.
+
+``` r
+usethis::use_lifecycle_badge("experimental")
+```
+
+Then, I’m gonna pick out chunks that have code that need to be
+packaged - we’ll send the contents of chunks to the .R folder. If you
+haven’t been conciencious and haven’t named your chunks (I hadn’t) you’d
+be advised to at least name the chunks with the code to be packaged.
+
+At this point too, I’m adding the `#' @export` tag, as well making my
+code explicit about function provenance, e.g. `ggplot2::aes()` instead
+of `aes()`
+
+``` r
+knitrExtra::chunk_names_get()
+#> It seems you are currently knitting a Rmd/Qmd file. The parsing of the file will be done in a new R session.
+#>  [1] "unnamed-chunk-1"     "unnamed-chunk-2"     "unnamed-chunk-3"    
+#>  [4] "unnamed-chunk-4"     "unnamed-chunk-5"     "unnamed-chunk-6"    
+#>  [7] "date_time_tz_to_tzs" "unnamed-chunk-7"     "StatLocalesAround"  
+#> [10] "unnamed-chunk-8"     "unnamed-chunk-9"     "geom_text_places"   
+#> [13] "chart_tz_wheel"      "unnamed-chunk-10"    "unnamed-chunk-11"   
+#> [16] "unnamed-chunk-12"    "unnamed-chunk-13"    "unnamed-chunk-14"   
+#> [19] "unnamed-chunk-15"    "unnamed-chunk-16"    "unnamed-chunk-17"
+```
+
+And now we can fling the code of interest over into the R folder, by
+naming the code chunks of interess — file names are based on the chunk
+names.
+
+``` r
+knitrExtra::chunk_to_dir(c("StatLocalesAround", "geom_text_places", "chart_tz_wheel", "date_time_tz_to_tzs"))
+#> It seems you are currently knitting a Rmd/Qmd file. The parsing of the file will be done in a new R session.
+#> It seems you are currently knitting a Rmd/Qmd file. The parsing of the file will be done in a new R session.
+#> It seems you are currently knitting a Rmd/Qmd file. The parsing of the file will be done in a new R session.
+#> It seems you are currently knitting a Rmd/Qmd file. The parsing of the file will be done in a new R session.
+```
+
+Code flung over!
+
+Do a package check. I usually just go for no errors - minimally viable
+package. There are loads of warnings and a few notes righ now… And make
+it a package
+
+``` r
+devtools::check()
+devtools::install(".", upgrade = "never")
+```
+
+# Test *packaged* functions
+
+``` r
+library(tidyverse)
+tribble(~timezone,
+        "America/Denver",
+        "America/New_York",
+        "Australia/Melbourne") |>
+  ggplot() + 
+    labs(title = "Virtual meetup coordinators' wheel, Summer 2026") + 
+    ggtz.wheel::chart_tz_wheel(aes(tz = timezone), 
+                   from_date_time = "2026-09-02 10:00:00")
+```
+
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 # In Shiny
 
@@ -591,7 +763,7 @@ shinyApp(ui = ui, server = server)
 
 ![](images/clipboard-700063936.png)
 
-<!-- # gg_facet_wrap_months -->
+![](images/clipboard-2909986001.png)<!-- # gg_facet_wrap_months -->
 
 <!-- ```{r} -->
 
